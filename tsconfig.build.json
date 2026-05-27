@@ -10,7 +10,7 @@
     "allowImportingTsExtensions": false,
     "declaration": true,
     "declarationMap": true,
-    "emitDeclarationOnly": false,
+    "emitDeclarationOnly": true,
     "noEmit": false,
     "outDir": "dist",
     "sourceMap": true

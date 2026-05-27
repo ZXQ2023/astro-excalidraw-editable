@@ -1,20 +1,36 @@
-import { execFile } from 'node:child_process'
-import { copyFile, rm, writeFile } from 'node:fs/promises'
+import { spawn } from 'node:child_process'
+import { copyFile, mkdir, rm, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { promisify } from 'node:util'
 
-const execFileAsync = promisify(execFile)
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const distDir = resolve(packageRoot, 'dist')
 
+function run(command, args) {
+  return new Promise((resolveRun, reject) => {
+    const child = spawn(command, args, {
+      cwd: packageRoot,
+      shell: process.platform === 'win32',
+      stdio: 'inherit',
+    })
+
+    child.on('error', reject)
+    child.on('close', (code) => {
+      if (code === 0) {
+        resolveRun()
+        return
+      }
+      reject(new Error(`${command} ${args.join(' ')} exited with code ${code}`))
+    })
+  })
+}
+
 await rm(distDir, { force: true, recursive: true })
 
-await execFileAsync('tsc', ['-p', 'tsconfig.build.json'], {
-  cwd: packageRoot,
-  stdio: 'inherit',
-})
+await run('vite', ['build'])
+await run('tsc', ['-p', 'tsconfig.build.json'])
 
+await mkdir(distDir, { recursive: true })
 await copyFile(
   resolve(packageRoot, 'src/Excalidraw.astro'),
   resolve(distDir, 'Excalidraw.astro'),
