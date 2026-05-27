@@ -1,24 +1,28 @@
 # @hokkeung/astro-excalidraw-editable
 
-在 Astro / MDX 中嵌入 Excalidraw 图，并在开发环境里直接编辑、保存回 `.excalidraw.json` 文件。
+Embed Excalidraw diagrams in Astro and MDX, with a development-only editor that saves changes back to `.excalidraw.json` files.
 
-## 特性
+[中文文档](./README.zh-CN.md)
 
-- 在页面中渲染只读 Excalidraw 预览。
-- 开发环境显示 `编辑` 按钮，打开全屏编辑器。
-- `Cmd+S` / `Ctrl+S` 保存修改到本地 JSON 文件。
-- 支持 MDX `src` 简写，自动注入 `initialData` 和 `dataPath`。
-- 跟随页面 `html.dark` 切换明暗主题。
-- 保存接口只允许写入指定目录和指定后缀的文件。
+## Features
 
-## 安装
+- Render clean, read-only Excalidraw previews in pages.
+- Show an `编辑` button in development and open a full-screen editor.
+- Save local JSON changes with `Cmd+S` / `Ctrl+S`.
+- Support MDX `src` shorthand and automatically inject `initialData` and `dataPath`.
+- Follow the page-level `html.dark` class for dark mode.
+- Restrict dev saves to an allowed directory and file suffix.
+
+## Install
 
 ```bash
 pnpm add @hokkeung/astro-excalidraw-editable @excalidraw/excalidraw
 pnpm astro add react
 ```
 
-## 配置
+`@excalidraw/excalidraw` must be installed in the consuming project because this package uses it as a peer dependency.
+
+## Configure Astro
 
 ```ts
 // astro.config.ts
@@ -34,9 +38,9 @@ export default defineConfig({
 })
 ```
 
-默认只允许保存到 `src/content/excalidraw` 目录下，文件后缀为 `.excalidraw.json`。
+By default, edited files can only be saved under `src/content/excalidraw`, and filenames must end with `.excalidraw.json`.
 
-需要自定义时：
+Customize the integration when needed:
 
 ```ts
 excalidrawEditable({
@@ -46,15 +50,15 @@ excalidrawEditable({
 })
 ```
 
-## 使用
+## Use In MDX
 
-先准备一个 Excalidraw JSON 文件：
+Create an Excalidraw JSON file:
 
 ```txt
 src/content/excalidraw/demo.excalidraw.json
 ```
 
-在 MDX 中使用：
+Use the component in MDX:
 
 ```mdx
 ---
@@ -66,51 +70,43 @@ import Excalidraw from '@hokkeung/astro-excalidraw-editable'
 <Excalidraw src="demo" height={520} />
 ```
 
-`src="demo"` 会被解析为：
+`src="demo"` resolves to:
 
 ```txt
 src/content/excalidraw/demo.excalidraw.json
 ```
 
-也可以使用子路径：
+Subpaths are supported:
 
 ```mdx
 <Excalidraw src="patterns/singleton" />
 ```
 
-或直接使用相对路径：
+You can also use a relative path:
 
 ```mdx
 <Excalidraw src="../content/excalidraw/demo.excalidraw.json" />
 ```
 
-开发环境中点击 `编辑` 后打开编辑器，保存会写回对应的 JSON 文件。生产环境默认关闭编辑能力，只显示预览。
+In development, click `编辑` to open the editor. Saving writes the updated scene back to the JSON file. In production, editing is disabled by default and the component renders a read-only preview.
 
-## 组件属性
+## Component Props
 
-组件支持 `@excalidraw/excalidraw` 的 React props，并额外支持：
+The component accepts the React props from `@excalidraw/excalidraw`, plus:
 
-| Prop | 类型 | 默认值 | 说明 |
+| Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `class` | `string` | - | 外层容器 class。 |
-| `dataPath` | `string` | - | 保存时使用的项目内 JSON 路径。 |
-| `editable` | `boolean` | `import.meta.env.DEV` | 是否显示编辑入口。 |
-| `height` | `number \| string` | `'400px'` | 图表高度，数字会按 px 处理。 |
-| `saveEndpoint` | `string` | `'/__excalidraw_save'` | 保存接口地址。 |
-| `src` | `string` | - | MDX 中的文件路径简写。 |
+| `class` | `string` | - | Extra class for the wrapper element. |
+| `dataPath` | `string` | - | Project-relative JSON path used for saving. |
+| `editable` | `boolean` | `import.meta.env.DEV` | Whether to show the edit entry. |
+| `height` | `number \| string` | `'400px'` | Diagram height. Numbers are treated as pixels. |
+| `saveEndpoint` | `string` | `'/__excalidraw_save'` | Client-side save endpoint. |
+| `src` | `string` | - | MDX file path shorthand. |
 
-## 可用导出
+## Exports
 
-- `@hokkeung/astro-excalidraw-editable`: Astro 组件。
-- `@hokkeung/astro-excalidraw-editable/integration`: Astro integration。
-- `@hokkeung/astro-excalidraw-editable/remark-plugin`: MDX `src` 转换插件。
-- `@hokkeung/astro-excalidraw-editable/react`: 底层 React 组件。
-- `@hokkeung/astro-excalidraw-editable/vite-plugin`: 开发环境保存中间件。
-
-## 本地开发
-
-```bash
-pnpm install
-pnpm build
-pnpm example:dev
-```
+- `@hokkeung/astro-excalidraw-editable`: Astro component.
+- `@hokkeung/astro-excalidraw-editable/integration`: Astro integration.
+- `@hokkeung/astro-excalidraw-editable/remark-plugin`: MDX `src` transform.
+- `@hokkeung/astro-excalidraw-editable/react`: underlying React component.
+- `@hokkeung/astro-excalidraw-editable/vite-plugin`: development save middleware.
