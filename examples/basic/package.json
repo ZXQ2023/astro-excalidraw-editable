@@ -10,8 +10,7 @@
   "dependencies": {
     "@astrojs/mdx": "^4.0.0",
     "@astrojs/react": "^5.0.0",
-    "@excalidraw/excalidraw": "^0.18.1",
-    "@hokkeung/astro-excalidraw-editable": "file:../..",
+    "@hokkeung/astro-excalidraw-editable": "workspace:*",
     "astro": "^5.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

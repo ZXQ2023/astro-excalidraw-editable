@@ -1,26 +1,24 @@
 # @hokkeung/astro-excalidraw-editable
 
-Embed Excalidraw diagrams in Astro pages and MDX content, with a development-only editor that can save changes back to `.excalidraw.json` files through a Vite middleware endpoint.
+在 Astro / MDX 中嵌入 Excalidraw 图，并在开发环境里直接编辑、保存回 `.excalidraw.json` 文件。
 
-## Features
+## 特性
 
-- Astro component wrapper around `@excalidraw/excalidraw`.
-- Read-only previews in production, editable overlays in development.
-- Theme follows the page-level `html.dark` class.
-- `Cmd+S` / `Ctrl+S` saves edited diagrams to disk during `astro dev`.
-- Save middleware restricts writes to an allowed directory and file suffix.
+- 在页面中渲染只读 Excalidraw 预览。
+- 开发环境显示 `编辑` 按钮，打开全屏编辑器。
+- `Cmd+S` / `Ctrl+S` 保存修改到本地 JSON 文件。
+- 支持 MDX `src` 简写，自动注入 `initialData` 和 `dataPath`。
+- 跟随页面 `html.dark` 切换明暗主题。
+- 保存接口只允许写入指定目录和指定后缀的文件。
 
-## Install
+## 安装
 
 ```bash
-pnpm add @hokkeung/astro-excalidraw-editable @excalidraw/excalidraw @astrojs/react react react-dom
+pnpm add @hokkeung/astro-excalidraw-editable @excalidraw/excalidraw
+pnpm astro add react
 ```
 
-This package expects Astro 5 and the Astro React integration. React is a peer
-dependency because `@excalidraw/excalidraw` is a React component; it is not
-bundled into this package. React 17, 18, and 19 are supported by the peer range.
-
-## Configure Astro
+## 配置
 
 ```ts
 // astro.config.ts
@@ -31,18 +29,32 @@ import { defineConfig } from 'astro/config'
 export default defineConfig({
   integrations: [
     react(),
-    excalidrawEditable({
-      allowedDir: 'src/content/excalidraw',
-      allowedSuffix: '.excalidraw.json',
-      endpoint: '/__excalidraw_save',
-    }),
+    excalidrawEditable(),
   ],
 })
 ```
 
-All options are optional. By default, the save endpoint only accepts files under `src/content/excalidraw` whose names end with `.excalidraw.json`.
+默认只允许保存到 `src/content/excalidraw` 目录下，文件后缀为 `.excalidraw.json`。
 
-## Use In MDX
+需要自定义时：
+
+```ts
+excalidrawEditable({
+  allowedDir: 'src/content/excalidraw',
+  allowedSuffix: '.excalidraw.json',
+  endpoint: '/__excalidraw_save',
+})
+```
+
+## 使用
+
+先准备一个 Excalidraw JSON 文件：
+
+```txt
+src/content/excalidraw/demo.excalidraw.json
+```
+
+在 MDX 中使用：
 
 ```mdx
 ---
@@ -51,76 +63,54 @@ title: Editable Diagram
 
 import Excalidraw from '@hokkeung/astro-excalidraw-editable'
 
-<Excalidraw
-  src="../content/excalidraw/demo.excalidraw.json"
-  height={520}
-/>
+<Excalidraw src="demo" height={520} />
 ```
 
-The integration includes a remark plugin that rewrites string `src` props at
-compile time. The example above becomes an imported JSON scene plus a
-repository-relative `dataPath`, so the diagram data and save path stay in sync.
-Shorthand values are also supported relative to `allowedDir`:
+`src="demo"` 会被解析为：
+
+```txt
+src/content/excalidraw/demo.excalidraw.json
+```
+
+也可以使用子路径：
 
 ```mdx
-<Excalidraw src="demo" />
 <Excalidraw src="patterns/singleton" />
 ```
 
-In development, the component shows an `编辑` button when `dataPath` is provided. Clicking it opens the full-screen editor. Saving posts the serialized Excalidraw scene to the configured endpoint.
+或直接使用相对路径：
 
-In production, `editable` defaults to `false`, so the same component renders a clean, non-interactive preview.
-
-## Component Props
-
-The default export accepts all Excalidraw React props plus:
-
-| Prop           | Type               | Default                | Description                                                       |
-| -------------- | ------------------ | ---------------------- | ----------------------------------------------------------------- |
-| `class`        | `string`           | `undefined`            | Extra class for the wrapper element.                              |
-| `dataPath`     | `string`           | `undefined`            | Repository-relative JSON file path used by the dev save endpoint. |
-| `editable`     | `boolean`          | `import.meta.env.DEV`  | Whether to show the edit button and editor overlay.               |
-| `height`       | `number \| string` | `'400px'`              | Wrapper height. Numbers are treated as pixels.                    |
-| `saveEndpoint` | `string`           | `'/__excalidraw_save'` | Client-side endpoint used when saving.                            |
-| `src`          | `string`           | `undefined`            | MDX-only shorthand transformed into `initialData` and `dataPath`. |
-
-## Integration Options
-
-```ts
-interface ExcalidrawEditableOptions {
-  allowedDir?: string
-  allowedSuffix?: string
-  componentNames?: string[]
-  endpoint?: string
-}
+```mdx
+<Excalidraw src="../content/excalidraw/demo.excalidraw.json" />
 ```
 
-If you change `endpoint`, pass the same value to `saveEndpoint` only when you need a per-component override. Most projects can configure the endpoint once through the integration.
+开发环境中点击 `编辑` 后打开编辑器，保存会写回对应的 JSON 文件。生产环境默认关闭编辑能力，只显示预览。
 
-## Exports
+## 组件属性
 
-- `@hokkeung/astro-excalidraw-editable`: Astro component.
-- `@hokkeung/astro-excalidraw-editable/integration`: Astro integration.
-- `@hokkeung/astro-excalidraw-editable/remark-plugin`: MDX `src` transform.
-- `@hokkeung/astro-excalidraw-editable/react`: underlying React component and prop type.
-- `@hokkeung/astro-excalidraw-editable/vite-plugin`: Vite middleware plugin.
+组件支持 `@excalidraw/excalidraw` 的 React props，并额外支持：
 
-## Build
+| Prop | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `class` | `string` | - | 外层容器 class。 |
+| `dataPath` | `string` | - | 保存时使用的项目内 JSON 路径。 |
+| `editable` | `boolean` | `import.meta.env.DEV` | 是否显示编辑入口。 |
+| `height` | `number \| string` | `'400px'` | 图表高度，数字会按 px 处理。 |
+| `saveEndpoint` | `string` | `'/__excalidraw_save'` | 保存接口地址。 |
+| `src` | `string` | - | MDX 中的文件路径简写。 |
+
+## 可用导出
+
+- `@hokkeung/astro-excalidraw-editable`: Astro 组件。
+- `@hokkeung/astro-excalidraw-editable/integration`: Astro integration。
+- `@hokkeung/astro-excalidraw-editable/remark-plugin`: MDX `src` 转换插件。
+- `@hokkeung/astro-excalidraw-editable/react`: 底层 React 组件。
+- `@hokkeung/astro-excalidraw-editable/vite-plugin`: 开发环境保存中间件。
+
+## 本地开发
 
 ```bash
-pnpm --filter @hokkeung/astro-excalidraw-editable build
+pnpm install
+pnpm build
+pnpm example:dev
 ```
-
-The build writes JavaScript, source maps, and `.d.ts` files to `dist/`, and copies the Astro component entry as `dist/Excalidraw.astro`.
-
-## Publish
-
-```bash
-pnpm --filter @hokkeung/astro-excalidraw-editable release -- --dry-run
-pnpm --filter @hokkeung/astro-excalidraw-editable release
-```
-
-The release script builds the package, packs the exact tarball into `.release/`,
-checks that the version has not already been published, and publishes that
-tarball to npm. Pass npm options through after `--`, for example
-`--tag next`, `--otp 123456`, or `--provenance`.

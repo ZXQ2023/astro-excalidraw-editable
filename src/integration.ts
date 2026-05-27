@@ -12,6 +12,7 @@ function appendOptimizeDeps(include: string[] = []) {
 export function excalidrawEditable(
   options: ExcalidrawEditableOptions = {},
 ): AstroIntegration {
+
   return {
     name: '@hokkeung/astro-excalidraw-editable',
     hooks: {
