@@ -1,0 +1,64 @@
+---
+import {
+  ExcalidrawEditable,
+  type ExcalidrawProps,
+} from './react/ExcalidrawEditable.js'
+import '@excalidraw/excalidraw/index.css'
+
+interface Props extends ExcalidrawProps {
+  class?: string
+  dataPath?: string
+  editable?: boolean
+  height?: number | string
+  saveEndpoint?: string
+  src?: string
+}
+
+const {
+  class: className,
+  dataPath,
+  editable = import.meta.env.DEV,
+  height = '400px',
+  saveEndpoint,
+  src: _src,
+  ...rest
+} = Astro.props
+
+const resolvedHeight = typeof height === 'number' ? `${height}px` : height
+---
+
+<div
+  class:list={['excalidraw-wrapper', className, { 'excalidraw-dev': editable }]}
+  style={`--excalidraw-height: ${resolvedHeight};`}
+>
+  <ExcalidrawEditable
+    client:only="react"
+    editable={editable}
+    dataPath={dataPath}
+    saveEndpoint={saveEndpoint}
+    {...rest}
+  />
+</div>
+
+<style>
+.excalidraw-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  height: var(--excalidraw-height);
+  border-radius: 8px;
+  overflow: hidden;
+  pointer-events: none;
+  contain: paint;
+}
+
+.excalidraw-wrapper.excalidraw-dev {
+  pointer-events: auto;
+}
+
+/* Keep embedded diagrams as clean read-only previews. */
+.excalidraw-wrapper :global(.excalidraw-preview-canvas .App-toolbar-content),
+.excalidraw-wrapper :global(.excalidraw-preview-canvas .context-menu) {
+  display: none !important;
+}
+</style>
