@@ -6,8 +6,163 @@ import Excalidraw from '@hokkeung/astro-excalidraw-editable'
 
 # Astro Excalidraw Editable
 
-<div style="width: 520px;">
+**@hokkeung/astro-excalidraw-editable** — 在 Astro 内容中嵌入可编辑的 Excalidraw 图表，开发模式下支持实时保存。
+
+---
+
+## 基础用法
+
+<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
+
+<div>
+<h4>默认主题 (Light)</h4>
 <Excalidraw
   src="../content/excalidraw/example.excalidraw.json"
 />
 </div>
+
+<div>
+<h4>深色主题 (Dark)</h4>
+<Excalidraw
+  src="../content/excalidraw/example.excalidraw.json"
+  theme="dark"
+/>
+</div>
+
+</div>
+
+---
+
+## 网格模式 & 禅模式
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(460px, 1fr))', gap: '2rem', marginBottom: '2rem' }}>
+
+<div>
+<h4>网格模式 (Grid Mode)</h4>
+<div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
+<Excalidraw
+  src="../content/excalidraw/example.excalidraw.json"
+  gridModeEnabled={true}
+/>
+</div>
+</div>
+
+<div>
+<h4>禅模式 (Zen Mode)</h4>
+<div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
+<Excalidraw
+  src="../content/excalidraw/example.excalidraw.json"
+  zenModeEnabled={true}
+/>
+</div>
+</div>
+
+</div>
+
+---
+
+## 自定义尺寸
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginBottom: '2rem' }}>
+
+<div>
+<h4>固定高度 200px</h4>
+<div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
+<Excalidraw
+  src="../content/excalidraw/example.excalidraw.json"
+  height={200}
+/>
+</div>
+</div>
+
+<div>
+<h4>固定高度 300px</h4>
+<div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
+<Excalidraw
+  src="../content/excalidraw/example.excalidraw.json"
+  theme="dark"
+  height={300}
+/>
+</div>
+</div>
+
+<div>
+<h4>固定高度 160px (紧凑)</h4>
+<div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
+<Excalidraw
+  src="../content/excalidraw/example.excalidraw.json"
+  height={160}
+/>
+</div>
+</div>
+
+</div>
+
+---
+
+## 卡片式布局
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+
+<div style={{ padding: '1.5rem', border: '1px solid #e2e8f0', borderRadius: '12px', backgroundColor: '#fff' }}>
+<h4 style={{ marginTop: 0 }}>产品架构图</h4>
+<p style={{ color: '#64748b', fontSize: '14px' }}>Light 主题 · 网格模式</p>
+<div style={{ borderRadius: '8px', overflow: 'hidden', marginTop: '1rem' }}>
+<Excalidraw
+  src="../content/excalidraw/example.excalidraw.json"
+  gridModeEnabled={true}
+  height={220}
+/>
+</div>
+</div>
+
+<div style={{ padding: '1.5rem', border: '1px solid #334155', borderRadius: '12px', backgroundColor: '#0f172a' }}>
+<h4 style={{ marginTop: 0, color: '#f1f5f9' }}>系统流程图</h4>
+<p style={{ color: '#94a3b8', fontSize: '14px' }}>Dark 主题 · 禅模式</p>
+<div style={{ borderRadius: '8px', overflow: 'hidden', marginTop: '1rem' }}>
+<Excalidraw
+  src="../content/excalidraw/example.excalidraw.json"
+  theme="dark"
+  zenModeEnabled={true}
+  height={220}
+/>
+</div>
+</div>
+
+<div style={{ padding: '1.5rem', border: '1px solid #e2e8f0', borderRadius: '12px', backgroundColor: '#fff' }}>
+<h4 style={{ marginTop: 0 }}>交互原型</h4>
+<p style={{ color: '#64748b', fontSize: '14px' }}>Light 主题 · 紧凑尺寸</p>
+<div style={{ borderRadius: '8px', overflow: 'hidden', marginTop: '1rem' }}>
+<Excalidraw
+  src="../content/excalidraw/example.excalidraw.json"
+  height={220}
+/>
+</div>
+</div>
+
+</div>
+
+---
+
+## 全宽展示
+
+<div style={{ marginBottom: '2rem' }}>
+<Excalidraw
+  src="../content/excalidraw/example.excalidraw.json"
+  height={400}
+/>
+</div>
+
+---
+
+## 属性一览
+
+| 属性 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `src` | `string` | — | Excalidraw JSON 文件路径 |
+| `theme` | `'light' \| 'dark'` | `'light'` | 主题模式 |
+| `height` | `number \| string` | 自动 | 图表高度 |
+| `editable` | `boolean` | `DEV` 模式 | 是否可编辑 |
+| `gridModeEnabled` | `boolean` | `false` | 网格模式 |
+| `zenModeEnabled` | `boolean` | `false` | 禅模式 |
+| `saveEndpoint` | `string` | `/__excalidraw_save` | 保存接口地址 |

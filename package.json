@@ -1,8 +1,9 @@
 {
   "name": "@hokkeung/astro-excalidraw-editable",
   "type": "module",
-  "version": "0.1.6",
+  "version": "0.1.9",
   "packageManager": "pnpm@10.33.0",
+  "license": "MIT",
   "description": "Editable Excalidraw diagrams for Astro content, with a dev-only save endpoint.",
   "homepage": "https://github.com/ZXQ2023/astro-excalidraw-editable#readme",
   "repository": {
