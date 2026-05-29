@@ -143,6 +143,21 @@ function resolveDiagramSrc(
   }
 }
 
+/**
+ * Remark 插件：在构建时自动转换 MDX 中的 `<Excalidraw src="..." />` 组件。
+ * 扫描 MDX AST，将字符串 `src` 属性转换为 `initialData`（JSON import）和 `dataPath`（文件路径），
+ * 并在文件顶部注入对应的 ESM import 语句。
+ *
+ * 转换前：<Excalidraw src="diagram.excalidraw.json" />
+ * 转换后：import __excalidrawData0 from "..."; <Excalidraw initialData={__excalidrawData0} dataPath="..." />
+ *
+ * A Remark plugin that transforms `<Excalidraw src="..." />` components in MDX at build time.
+ * Scans the MDX AST, converts the string `src` attribute into `initialData` (JSON import) and `dataPath` (file path),
+ * and injects the corresponding ESM import statements at the top of the file.
+ *
+ * Before: <Excalidraw src="diagram.excalidraw.json" />
+ * After:  import __excalidrawData0 from "..."; <Excalidraw initialData={__excalidrawData0} dataPath="..." />
+ */
 export function remarkExcalidrawEditable(
   options: RemarkExcalidrawEditableOptions = {},
 ) {
