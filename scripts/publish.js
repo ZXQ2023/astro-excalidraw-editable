@@ -106,17 +106,15 @@ async function findPackedTarball() {
 
 log(`preparing ${packageSpec}`)
 
-let publishedVersionExists = false
+const publishedVersionExists = dryRun ? await versionExists() : false
 
-if (dryRun) {
-  publishedVersionExists = await versionExists()
-} else {
+if (!dryRun) {
   log('checking npm login')
   await run('npm', ['whoami'])
 
   log('checking whether this version already exists')
-  publishedVersionExists = await versionExists()
-  if (publishedVersionExists) {
+  const versionAlreadyExists = await versionExists()
+  if (versionAlreadyExists) {
     throw new Error(
       `${packageSpec} already exists on npm. Bump the package version first.`,
     )

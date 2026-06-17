@@ -14,6 +14,12 @@ const DEFAULT_SAVE_ENDPOINT = '/__excalidraw_save'
 /** 1 = Virgil, 2 = Helvetica, 3 = Cascadia. */
 const FONT_FAMILY = 3
 
+const getDocumentTheme = () =>
+  typeof document !== 'undefined' &&
+    document.documentElement.classList.contains('dark')
+    ? 'dark'
+    : 'light'
+
 export type ExcalidrawProps = ComponentProps<typeof Draw>
 type OnChangeArgs = Parameters<NonNullable<ExcalidrawProps['onChange']>>
 type SceneElement = ReturnType<ExcalidrawImperativeAPI['getSceneElements']>[
@@ -36,31 +42,30 @@ export function ExcalidrawEditable(
     ...drawProps
   }: EditableProps & ExcalidrawProps,
 ) {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light')
+  const [theme, setTheme] = useState<'light' | 'dark'>(getDocumentTheme)
   const [isEditing, setIsEditing] = useState(false)
+  const [isPreviewExpanded, setIsPreviewExpanded] = useState(false)
   const [isDirty, setIsDirty] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [activeInitialData, setActiveInitialData] = useState(initialData)
   const [previewKey, setPreviewKey] = useState(0)
   const [editorKey, setEditorKey] = useState(0)
+  const [expandedPreviewKey, setExpandedPreviewKey] = useState(0)
 
   const latestOnChangeArgs = useRef<OnChangeArgs | null>(null)
   const lastSavedSnapshot = useRef('')
   const isFirstChange = useRef(true)
 
   useEffect(() => {
+    // Excalidraw reads initialData on mount, so reset the preview when it changes.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setActiveInitialData(initialData)
     setPreviewKey((key) => key + 1)
   }, [initialData])
 
   useEffect(() => {
-    const getTheme = () =>
-      document.documentElement.classList.contains('dark') ? 'dark' : 'light'
-
-    setTheme(getTheme())
-
     const observer = new MutationObserver(() => {
-      setTheme(getTheme())
+      setTheme(getDocumentTheme())
     })
     observer.observe(document.documentElement, {
       attributes: true,
@@ -123,13 +128,21 @@ export function ExcalidrawEditable(
   }, [])
 
   const closeEditor = useCallback(() => {
-    // eslint-disable-next-line no-alert
     if (isDirty && !globalThis.confirm('有未保存的修改，确定关闭编辑器吗？')) {
       return
     }
     setIsEditing(false)
     setIsDirty(false)
   }, [isDirty])
+
+  const openExpandedPreview = useCallback(() => {
+    setExpandedPreviewKey((key) => key + 1)
+    setIsPreviewExpanded(true)
+  }, [])
+
+  const closeExpandedPreview = useCallback(() => {
+    setIsPreviewExpanded(false)
+  }, [])
 
   const handleSave = useCallback(async () => {
     if (!editable || !dataPath || isSaving) return
@@ -160,7 +173,6 @@ export function ExcalidrawEditable(
       setIsDirty(false)
     } catch (error) {
       console.error('[excalidraw-editable] save failed:', error)
-      // eslint-disable-next-line no-alert
       alert(`保存失败: ${error instanceof Error ? error.message : error}`)
     } finally {
       setIsSaving(false)
@@ -192,13 +204,31 @@ export function ExcalidrawEditable(
   }, [editable, isDirty])
 
   useEffect(() => {
-    if (!isEditing) return
+    if (!editable || !isEditing) return
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     return () => {
       document.body.style.overflow = previousOverflow
     }
-  }, [isEditing])
+  }, [editable, isEditing])
+
+  useEffect(() => {
+    if (!isPreviewExpanded) return
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        closeExpandedPreview()
+      }
+    }
+    globalThis.addEventListener('keydown', handler)
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+      globalThis.removeEventListener('keydown', handler)
+    }
+  }, [isPreviewExpanded, closeExpandedPreview])
 
   const editor = editable && isEditing
     ? (
@@ -253,6 +283,34 @@ export function ExcalidrawEditable(
     )
     : null
 
+  const expandedPreview = isPreviewExpanded
+    ? (
+      <div
+        aria-label='关闭预览'
+        className='excalidraw-expanded-preview'
+        onClick={closeExpandedPreview}
+        role='button'
+        style={previewOverlayStyle}
+        tabIndex={-1}
+      >
+        <style>{previewOnlyStyle}</style>
+        <div
+          className='excalidraw-preview-canvas'
+          style={expandedPreviewCanvasStyle}
+        >
+          <Draw
+            key={expandedPreviewKey}
+            viewModeEnabled
+            theme={theme}
+            excalidrawAPI={previewExcalidrawAPI}
+            initialData={activeInitialData}
+            {...drawProps}
+          />
+        </div>
+      </div>
+    )
+    : null
+
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       <div className='excalidraw-preview-canvas' style={canvasFillStyle}>
@@ -265,25 +323,42 @@ export function ExcalidrawEditable(
           {...drawProps}
         />
       </div>
-      {editable && dataPath && (
+      <div style={previewActionsStyle}>
         <button
-          onClick={openEditor}
-          style={openButtonStyle}
+          onClick={openExpandedPreview}
+          style={previewButtonStyle}
           type='button'
         >
-          编辑
+          放大
         </button>
-      )}
+        {editable && dataPath && (
+          <button
+            onClick={openEditor}
+            style={previewButtonStyle}
+            type='button'
+          >
+            编辑
+          </button>
+        )}
+      </div>
+      {expandedPreview && createPortal(expandedPreview, document.body)}
       {editor && createPortal(editor, document.body)}
     </div>
   )
 }
 
-const openButtonStyle: CSSProperties = {
+const previewActionsStyle: CSSProperties = {
   position: 'absolute',
   top: 12,
   right: 12,
   zIndex: 10,
+  display: 'flex',
+  alignItems: 'center',
+  gap: 8,
+  pointerEvents: 'auto',
+}
+
+const previewButtonStyle: CSSProperties = {
   padding: '7px 14px',
   borderRadius: 6,
   border: '1px solid rgba(15, 23, 42, 0.14)',
@@ -294,7 +369,6 @@ const openButtonStyle: CSSProperties = {
   fontSize: 13,
   fontWeight: 600,
   fontFamily: 'system-ui, sans-serif',
-  pointerEvents: 'auto',
 }
 
 const canvasFillStyle: CSSProperties = {
@@ -315,6 +389,38 @@ const editorOverlayStyle: CSSProperties = {
   backgroundColor: 'rgba(15, 23, 42, 0.42)',
   pointerEvents: 'auto',
 }
+
+const previewOverlayStyle: CSSProperties = {
+  position: 'fixed',
+  inset: 0,
+  zIndex: 9999,
+  boxSizing: 'border-box',
+  padding: '6vh 6vw',
+  backgroundColor: 'rgba(248, 250, 252, 0.28)',
+  backdropFilter: 'blur(16px)',
+  WebkitBackdropFilter: 'blur(16px)',
+  cursor: 'zoom-out',
+  pointerEvents: 'auto',
+}
+
+const expandedPreviewCanvasStyle: CSSProperties = {
+  width: '100%',
+  height: '100%',
+  borderRadius: 8,
+  overflow: 'hidden',
+  pointerEvents: 'none',
+}
+
+const previewOnlyStyle = `
+.excalidraw-expanded-preview .App-toolbar-content,
+.excalidraw-expanded-preview .context-menu,
+.excalidraw-expanded-preview .layer-ui__wrapper__footer-right,
+.excalidraw-expanded-preview .help-icon,
+.excalidraw-expanded-preview .Stack_vertical,
+.excalidraw-expanded-preview footer {
+  display: none !important;
+}
+`
 
 const editorPanelStyle: CSSProperties = {
   display: 'flex',

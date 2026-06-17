@@ -24,6 +24,8 @@ const {
   ...rest
 } = Astro.props
 
+void _src
+
 const resolvedHeight = typeof height === 'number' ? `${height}px` : height
 ---
 
@@ -48,12 +50,8 @@ const resolvedHeight = typeof height === 'number' ? `${height}px` : height
   height: var(--excalidraw-height);
   border-radius: 8px;
   overflow: hidden;
-  pointer-events: none;
-  contain: paint;
-}
-
-.excalidraw-wrapper.excalidraw-dev {
   pointer-events: auto;
+  contain: paint;
 }
 
 /* Keep embedded diagrams as clean read-only previews. */
