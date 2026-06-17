@@ -88,9 +88,9 @@ You can also use a relative path:
 <Excalidraw src="../content/excalidraw/demo.excalidraw.json" />
 ```
 
-Click `放大` in any environment to open a larger read-only preview over a blurred backdrop.
+Click the zoom icon in any environment to open a larger read-only preview over a blurred backdrop.
 
-In development, click `编辑` to open the editor when the component is editable and has a save path. Saving writes the updated scene back to the JSON file. In production, editing is disabled by default and the component renders a read-only preview.
+In development, click the edit icon to open the editor when the component is editable and has a save path. Saving writes the updated scene back to the JSON file. In production, editing is disabled by default and the component renders a read-only preview.
 
 ## Component Props
 

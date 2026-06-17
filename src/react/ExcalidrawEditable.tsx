@@ -325,19 +325,23 @@ export function ExcalidrawEditable(
       </div>
       <div style={previewActionsStyle}>
         <button
+          aria-label='Zoom preview'
           onClick={openExpandedPreview}
           style={previewButtonStyle}
+          title='Zoom preview'
           type='button'
         >
-          放大
+          <ZoomInIcon />
         </button>
         {editable && dataPath && (
           <button
+            aria-label='Edit diagram'
             onClick={openEditor}
             style={previewButtonStyle}
+            title='Edit diagram'
             type='button'
           >
-            编辑
+            <EditIcon />
           </button>
         )}
       </div>
@@ -359,7 +363,12 @@ const previewActionsStyle: CSSProperties = {
 }
 
 const previewButtonStyle: CSSProperties = {
-  padding: '7px 14px',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: 34,
+  height: 34,
+  padding: 0,
   borderRadius: 6,
   border: '1px solid rgba(15, 23, 42, 0.14)',
   backgroundColor: 'rgba(255, 255, 255, 0.94)',
@@ -369,6 +378,47 @@ const previewButtonStyle: CSSProperties = {
   fontSize: 13,
   fontWeight: 600,
   fontFamily: 'system-ui, sans-serif',
+  lineHeight: 1,
+}
+
+function ZoomInIcon() {
+  return (
+    <svg
+      aria-hidden='true'
+      fill='none'
+      height='18'
+      stroke='currentColor'
+      strokeLinecap='round'
+      strokeLinejoin='round'
+      strokeWidth='2'
+      viewBox='0 0 24 24'
+      width='18'
+    >
+      <circle cx='11' cy='11' r='7' />
+      <path d='m20 20-4.3-4.3' />
+      <path d='M11 8v6' />
+      <path d='M8 11h6' />
+    </svg>
+  )
+}
+
+function EditIcon() {
+  return (
+    <svg
+      aria-hidden='true'
+      fill='none'
+      height='18'
+      stroke='currentColor'
+      strokeLinecap='round'
+      strokeLinejoin='round'
+      strokeWidth='2'
+      viewBox='0 0 24 24'
+      width='18'
+    >
+      <path d='M12 20h9' />
+      <path d='M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z' />
+    </svg>
+  )
 }
 
 const canvasFillStyle: CSSProperties = {
